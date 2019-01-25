@@ -1,0 +1,100 @@
+
+https://www.programmergate.com/deploy-spring-boot-application-external-tomcat/    (External Tomcat)
+
+1)Change the packaging property to war in pom.xml
+  
+  <packaging>war</packaging>
+
+2)Add the following dependency to pom.xml in order to tell Spring Boot not to use its embedded Tomcat
+
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-tomcat</artifactId>
+    <scope>provided</scope>
+  </dependency>
+  
+3)define the starting class in pom.xml
+
+    <properties>
+	    <start-class>com.journaldev.spring.SpringBootRestApplication</start-class>
+		<java.version>8</java.version>
+	</properties>
+	
+4)modify @SpringBootApplication class as following
+
+	@SpringBootApplication
+	public class SpringBootRestApplication extends SpringBootServletInitializer {
+
+		public static void main(String[] args) {
+			SpringApplication.run(SpringBootRestApplication.class, args);
+		}
+		
+		@Override
+		protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+			return application.sources(SpringBootRestApplication.class);
+		}
+		
+	}
+	
+5)Now we can deploy our war file to any external web server like Tomcat, Jetty...   (but can't deploy to JBoss,Weblogic)
+
+http://localhost:8080/WarFileName
+http://localhost:8080/WarFileName/person/get
+http://localhost:8080/WarFileName/person/get?name=Vasu
+
+http://localhost:8080/WarFileName/person/update    (POST)
+http://localhost:8080/WarFileName/person/update2   (POST, JSON)
+-------------------------------------------------------------------------------------------------------------------------------------
+https://o7planning.org/en/11901/deploying-spring-boot-application-on-oracle-weblogic-server
+http://www.virtual7.de/blog/2016/07/oracle-weblogic-server-spring-boot/
+
+Weblogic deployment steps
+1)modify @SpringBootApplication class as following
+
+	import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+	import org.springframework.web.WebApplicationInitializer;
+
+	@SpringBootApplication
+	public class SpringBootRestApplication extends SpringBootServletInitializer implements WebApplicationInitializer {
+
+		public static void main(String[] args) {
+			SpringApplication.run(SpringBootRestApplication.class, args);
+		}
+		
+		@Override
+		protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+			return application.sources(SpringBootRestApplication.class);
+		}
+		
+	}
+	
+2)create webapp folder in src/main/ folder, then create WEB-INF folder in webapp  (src/main/webapp/WEB-INF)
+
+3)create weblogic.xml and dispatcherServlet-servlet.xml in WEB-INF folder as following
+
+a)weblogic.xml
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<wls:weblogic-web-app
+			xmlns:wls="http://xmlns.oracle.com/weblogic/weblogic-web-app"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:schemaLocation="http://xmlns.oracle.com/weblogic/weblogic-web-app
+			http://xmlns.oracle.com/weblogic/weblogic-web-app/1.4/weblogic-web-app.xsd">
+		<wls:context-root>/SpringBootREST</wls:context-root>
+		<wls:container-descriptor>
+			<wls:prefer-application-packages>
+				<wls:package-name>org.slf4j.*</wls:package-name>
+				<wls:package-name>org.springframework.*</wls:package-name>
+			</wls:prefer-application-packages>
+		</wls:container-descriptor>
+	</wls:weblogic-web-app>
+	
+b)dispatcherServlet-servlet.xml
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	</beans>
+
+4)Now we can deploy our war file to Weblogic server
