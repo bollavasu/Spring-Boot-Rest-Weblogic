@@ -15,7 +15,7 @@ public class PersonController {
 	
 	@RequestMapping("/")
 	public String healthCheck() {
-		return "Welcome to Spring Boot REST...";
+		return "Welcome to Spring Boot REST Weblogic...";
 	}
 	
 	@RequestMapping("/person/get")
